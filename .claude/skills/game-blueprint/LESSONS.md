@@ -5,6 +5,7 @@ Short, dated preferences learned from use. Read before every blueprint. Keep und
 ## Interview
 
 ## Cards
+- First Playable controls always include touch-screen input (tap/drag) alongside keyboard/mouse. (2026-11-04)
 
 ## Tabs
 
