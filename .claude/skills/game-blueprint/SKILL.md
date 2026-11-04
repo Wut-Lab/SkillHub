@@ -48,7 +48,7 @@ The First Playable card must describe the **smallest** game someone can start, p
 **Fixed rules (don't change unless a lesson says so):**
 - Build Log cards start collapsed (no `open` attribute).
 - A card whose boxes are all ticked turns gray but stays readable and clickable (`details.done`).
-- Card order: 1 Game Overview, 2 Key Features, 3 First Playable. New cards are added later, numbered 4, 5…, by request or from notes.
+- Card order: 1 Game Overview, 2 Key Features, 3 First Playable. New cards are added later, numbered 4, 5…, by request, from notes, or automatically (Expanding the Game, see section 4).
 - Exactly two other tabs, **Tab 1** and **Tab 2**, start empty with the shared placeholder text and the add/edit form.
 - No ideas/parking card and no playable demo widget.
 
@@ -59,6 +59,7 @@ Publish with the Artifact tool: the filled file, `icon: "game"`, `capabilities: 
 ## 4. Later changes to a blueprint
 
 - Before coding any piece of the game, read the blueprint's saved data with `ArtifactData` (`sections`, `tab1`, `tab2`, and any added collections) and follow the notes.
+- **Expanding the Game card:** whenever you read the saved data and every box in cards 1–3 is ticked (`sections/overview`, `sections/features`, `sections/playable`), and no such card exists yet, add card 4 **Expanding the Game** (`data-id="expand"`, why: "growing what we have"). Give it exactly 5 checklist items that tack onto what has actually been built: read the game's code and the blueprint's notes and entries first, so each item extends an existing system (a new tier, more content, a reward loop, an upgrade) rather than starting a new one. One line each, concrete and buildable. Tell the user the card was added.
 - **New card:** append a numbered `<details data-id="...">` in the marked spot, same structure, collapsed.
 - **Rename or repurpose a tab:** change the tab button text and its form fields; keep its `data-coll`, or move its entries to the new collection with `ArtifactData`.
 - **New tab:** add a tab button and a `<section class="pane" ... data-coll="<name>">`; the script builds its list and form.
