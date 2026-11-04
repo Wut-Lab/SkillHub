@@ -1,0 +1,178 @@
+<title>{{GAME}} Blueprint</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<!-- THEME FONTS: swap for fonts that fit the theme (Google Fonts only) -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;700&display=swap">
+<style>
+/* ===== THEME: the only block that changes per game. Keep every token name. ===== */
+:root{--bg:#eef0f4;--card:#ffffff;--fg:#1b1f2a;--mute:#5c6475;--accent:#3b5bdb;--accent2:#e8590c;--line:#d3d8e2;--ok:#2f9e44;
+--disp:"Space Grotesk",system-ui,sans-serif;--body:"Inter",system-ui,sans-serif;--radius:10px;
+--pattern:none}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12151c;--card:#1b1f2a;--fg:#e6e9f0;--mute:#9aa3b5;--accent:#7b93ff;--accent2:#ff922b;--line:#2c3242;--ok:#69db7c;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12151c;--card:#1b1f2a;--fg:#e6e9f0;--mute:#9aa3b5;--accent:#7b93ff;--accent2:#ff922b;--line:#2c3242;--ok:#69db7c;color-scheme:dark}
+/* ===== END THEME ===== */
+
+body{background:var(--bg);background-image:var(--pattern);color:var(--fg);font:16px/1.55 var(--body);margin:0;
+padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px}
+main{max-width:700px;margin:0 auto;display:grid;gap:16px}
+header{background:var(--card);border:2px solid var(--line);border-radius:var(--radius);padding:16px}
+h1{font:700 clamp(1.8rem,6vw,2.4rem)/1.1 var(--disp);margin:0;color:var(--accent);text-wrap:balance}
+.sub{color:var(--mute);margin:6px 0 0}
+.tabs{display:flex;gap:6px;overflow-x:auto}
+.tabs button{flex:none;font:700 1rem var(--disp);padding:8px 16px;min-height:44px;border-radius:var(--radius) var(--radius) 0 0;border:2px solid var(--line);border-bottom:0;background:transparent;color:var(--mute);cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--card);color:var(--accent)}
+.pane{display:grid;gap:16px}.pane[hidden]{display:none}
+details,.card{background:var(--card);border:2px solid var(--line);border-radius:var(--radius)}
+summary{cursor:pointer;padding:14px 16px;display:flex;gap:12px;align-items:baseline;list-style:none}
+summary::-webkit-details-marker{display:none}
+:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
+.n{font:800 1.3rem var(--disp);color:var(--accent2)}
+.t{font:700 1.15rem var(--disp)}
+.why{color:var(--mute);font-size:.9rem;margin-left:auto}
+.cnt{font:700 .85rem var(--body);color:var(--ok);white-space:nowrap}
+/* Complete: grayed but readable and interactive */
+details.done{filter:grayscale(1);opacity:.7;border-style:dashed}
+details.done .t::after{content:" · complete";color:var(--mute);font-weight:400;font-size:.85rem}
+details.done:hover,details.done:focus-within{opacity:.9}
+.body{padding:0 16px 16px;border-top:1px dashed var(--line);display:grid;gap:10px}
+.body>p{margin:12px 0 0}
+.spec{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:12px}
+.spec div{border:1px solid var(--line);border-radius:6px;padding:8px 10px;display:grid;gap:2px}
+.spec b{font:700 .75rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+ul{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+label{display:flex;gap:8px;cursor:pointer;align-items:flex-start}
+input[type=checkbox]{accent-color:var(--ok);margin-top:5px}
+input:checked+span{text-decoration:line-through;color:var(--mute)}
+.bar{height:6px;background:var(--line);border-radius:3px}
+.bar i{display:block;height:100%;background:var(--ok);border-radius:3px;width:0;transition:width .2s}
+.notes>label{font:700 .8rem var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--mute);justify-content:space-between;cursor:default}
+.st{font-weight:400;letter-spacing:0;text-transform:none}
+textarea,.form input,.form select{width:100%;box-sizing:border-box;font:15px/1.5 var(--body);color:var(--fg);background:var(--bg);border:2px solid var(--line);border-radius:6px;padding:8px}
+textarea{min-height:80px;resize:vertical;margin-top:4px}
+.card{padding:16px;display:grid;gap:10px}.card h2{font:700 1.15rem var(--disp);margin:0}.card p{margin:0}
+.hint{font-size:.88rem;color:var(--mute)}
+.items{display:grid;gap:10px}
+.item{border:2px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--bg);display:grid;gap:4px}
+.item h3{margin:0;font:700 1rem var(--disp);display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.item p{margin:0;font-size:.92rem;white-space:pre-wrap}
+.tag{font:700 .72rem var(--body);letter-spacing:.05em;text-transform:uppercase;border-radius:999px;padding:1px 8px;border:2px solid var(--line);color:var(--mute)}
+.tag.built{background:var(--ok);border-color:var(--ok);color:#fff}.tag.building{border-color:var(--accent2);color:var(--fg)}
+.acts{display:flex;gap:6px;justify-content:flex-end}
+.btn{font:700 .9rem var(--disp);padding:6px 14px;min-height:36px;border-radius:6px;border:2px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.form label{display:grid;gap:2px;font:700 .8rem var(--body);color:var(--mute);cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.row label{flex:1;min-width:140px}
+@media (max-width:480px){.why{display:none}.cnt{margin-left:auto}}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+<main>
+<header><h1>{{GAME}} Blueprint</h1>
+<p class="sub">The systems to build, in order. Each one depends on the ones before it. Notes you leave here are saved, and Claude reads them before coding each piece.</p></header>
+
+<nav class="tabs" role="tablist">
+<button role="tab" id="t-build" aria-controls="p-build" aria-selected="true">Build Log</button>
+<button role="tab" id="t-tab1" aria-controls="p-tab1" aria-selected="false">Tab 1</button>
+<button role="tab" id="t-tab2" aria-controls="p-tab2" aria-selected="false">Tab 2</button>
+</nav>
+
+<section class="pane" id="p-build" role="tabpanel" aria-labelledby="t-build">
+
+<details data-id="overview"><summary><span class="n">1</span><span class="t">Game Overview</span><span class="why">what this game is</span></summary>
+<div class="body">
+<div class="spec"><div><b>Genre</b><span>{{GENRE}}</span></div><div><b>Theme</b><span>{{THEME}}</span></div><div><b>Core loop</b><span>{{CORE_LOOP}}</span></div></div>
+<ul>
+<li><label><input type="checkbox"><span>Genre locked in</span></label></li>
+<li><label><input type="checkbox"><span>Theme locked in: look, mood and setting</span></label></li>
+<li><label><input type="checkbox"><span>Core loop locked in</span></label></li>
+</ul><div class="bar"><i></i></div>
+<div class="notes"><label for="n-overview">Notes for Claude <span class="st"></span></label><textarea id="n-overview" placeholder="Anything to change about the genre, theme or core loop…"></textarea></div></div></details>
+
+<details data-id="features"><summary><span class="n">2</span><span class="t">Key Features</span><span class="why">what makes it this game</span></summary>
+<div class="body"><p>The three features that set this game apart. Each one is built on top of the core loop.</p>
+<ul>
+<li><label><input type="checkbox"><span>{{FEATURE_1}}</span></label></li>
+<li><label><input type="checkbox"><span>{{FEATURE_2}}</span></label></li>
+<li><label><input type="checkbox"><span>{{FEATURE_3}}</span></label></li>
+</ul><div class="bar"><i></i></div>
+<div class="notes"><label for="n-features">Notes for Claude <span class="st"></span></label><textarea id="n-features" placeholder="Swap a feature, add detail, set priorities…"></textarea></div></div></details>
+
+<details data-id="playable"><summary><span class="n">3</span><span class="t">First Playable</span><span class="why">start, play, finish, replay</span></summary>
+<div class="body"><p>The smallest complete version of the game. When this card is done, someone can play it from start to finish.</p>
+<ul>
+<li><label><input type="checkbox"><span>{{PLAY_START}}</span></label></li>
+<li><label><input type="checkbox"><span>{{PLAY_CONTROLS}}</span></label></li>
+<li><label><input type="checkbox"><span>{{PLAY_LOOP}}</span></label></li>
+<li><label><input type="checkbox"><span>{{PLAY_END}}</span></label></li>
+<li><label><input type="checkbox"><span>{{PLAY_HUD}}</span></label></li>
+<li><label><input type="checkbox"><span>End screen with Play again that restarts cleanly</span></label></li>
+</ul><div class="bar"><i></i></div>
+<div class="notes"><label for="n-playable">Notes for Claude <span class="st"></span></label><textarea id="n-playable" placeholder="Controls, how to win or lose, what the screen should show…"></textarea></div></div></details>
+
+<!-- NEW CARDS: append numbered <details data-id="..."> cards here, same structure as above -->
+</section>
+
+<section class="pane" id="p-tab1" role="tabpanel" aria-labelledby="t-tab1" hidden data-coll="tab1"></section>
+<section class="pane" id="p-tab2" role="tabpanel" aria-labelledby="t-tab2" hidden data-coll="tab2"></section>
+</main>
+
+<template id="tab-tpl">
+<div class="card"><h2 class="tab-h"></h2>
+<p class="hint">This is a placeholder tab. Ask Claude to rename it, change what it tracks (characters, enemies, levels, items…) or change its form fields. More tabs can be added the same way. Entries you add here are saved, and Claude reads them before coding.</p>
+<div class="items"><p class="hint">Loading…</p></div></div>
+<form class="card form"><h2 class="form-h">Add an entry</h2>
+<label>Name <input name="title" required maxlength="80"></label>
+<div class="row"><label>Status <select name="status"><option value="idea">Idea</option><option value="building">In progress</option><option value="built">Built</option></select></label></div>
+<label>Details <textarea name="details" rows="3" maxlength="2000"></textarea></label>
+<div class="row"><button type="submit" class="btn primary save">Add entry</button><button type="button" class="btn cancel" hidden>Cancel</button><span class="st fst"></span></div></form>
+</template>
+
+<script>
+const $=s=>document.querySelector(s);
+const getDb=async()=>{try{return typeof claude!=='undefined'&&claude.use?await claude.use('db'):null}catch(e){return null}};
+const dbP=getDb();
+
+// Tabs (last tab remembered per viewer)
+const tabs=[...document.querySelectorAll('[role=tab]')];
+const showTab=id=>{tabs.forEach(b=>{const on=b.id===id;b.setAttribute('aria-selected',on);document.getElementById(b.getAttribute('aria-controls')).hidden=!on});try{localStorage.setItem('bp-tab',id)}catch(e){}};
+tabs.forEach(b=>b.onclick=()=>showTab(b.id));
+try{const t=localStorage.getItem('bp-tab');if(t&&document.getElementById(t))showTab(t)}catch(e){}
+
+// Build Log cards: progress, completion, saved notes + checks
+const cards=[...document.querySelectorAll('#p-build details')];
+const bar=d=>{const bs=[...d.querySelectorAll('input[type=checkbox]')],n=bs.filter(x=>x.checked).length;
+d.querySelector('.bar i').style.width=(bs.length?n/bs.length*100:0)+'%';d.classList.toggle('done',bs.length>0&&n===bs.length);
+let c=d.querySelector('.cnt');if(!c){c=document.createElement('span');c.className='cnt';d.querySelector('summary').append(c)}c.textContent=n+' of '+bs.length};
+cards.forEach(d=>{bar(d);d.querySelectorAll('input').forEach(x=>x.addEventListener('change',()=>bar(d)))});
+dbP.then(db=>cards.forEach(d=>{const ta=d.querySelector('textarea'),st=d.querySelector('.st'),bs=[...d.querySelectorAll('input[type=checkbox]')];
+if(!db){st.textContent='Saving unavailable here';return}
+const ref=db.doc('sections/'+d.dataset.id);let t;
+const save=async()=>{st.textContent='Saving…';try{await ref.set({notes:ta.value,checks:bs.map(b=>b.checked)});st.textContent='Saved'}catch(e){st.textContent='Not saved: '+(e.message||'no write access')}};
+ta.addEventListener('input',()=>{clearTimeout(t);st.textContent='Editing…';t=setTimeout(save,800)});
+bs.forEach(b=>b.addEventListener('change',save));
+ref.onSnapshot(s=>{const v=s.data();if(!v)return;if(document.activeElement!==ta&&typeof v.notes==='string')ta.value=v.notes;(v.checks||[]).forEach((c,i)=>bs[i]&&(bs[i].checked=!!c));bar(d)});
+}));
+
+// Placeholder tabs: each pane is a list + add/edit form backed by its own db collection
+const LBL={idea:'Idea',building:'In progress',built:'Built'};
+document.querySelectorAll('[data-coll]').forEach(pane=>{
+pane.append($('#tab-tpl').content.cloneNode(true));
+const name=document.querySelector(`[aria-controls="${pane.id}"]`).textContent;
+pane.querySelector('.tab-h').textContent=name;
+const list=pane.querySelector('.items'),form=pane.querySelector('form'),st=pane.querySelector('.fst'),save=pane.querySelector('.save'),cancel=pane.querySelector('.cancel');
+let rows=[],editing=null;
+const reset=()=>{editing=null;form.reset();pane.querySelector('.form-h').textContent='Add an entry';save.textContent='Add entry';cancel.hidden=true};
+cancel.onclick=reset;
+dbP.then(db=>{
+const render=()=>{list.innerHTML='';if(!rows.length){const p=document.createElement('p');p.className='hint';p.textContent=db?'Nothing here yet. Add the first entry below.':'Entries need saving, which isn\'t available in this view.';list.append(p);return}
+for(const r of rows){const el=document.createElement('div');el.className='item';const h=document.createElement('h3');h.append(r.title||'Untitled');
+if(r.status){const s=document.createElement('span');s.className='tag '+r.status;s.textContent=LBL[r.status]??r.status;h.append(s)}el.append(h);
+if(r.details){const p=document.createElement('p');p.textContent=r.details;el.append(p)}
+const a=document.createElement('div');a.className='acts';
+const e=document.createElement('button');e.type='button';e.className='btn';e.textContent='Edit';e.onclick=()=>{editing=r.id;for(const f of form.elements)if(f.name)f.value=r[f.name]??(f.tagName==='SELECT'?f.options[0].value:'');pane.querySelector('.form-h').textContent='Edit entry';save.textContent='Save changes';cancel.hidden=false;form.scrollIntoView({behavior:'smooth'})};
+const x=document.createElement('button');x.type='button';x.className='btn';x.textContent='Delete';x.onclick=async()=>{if(!confirm(`Delete “${r.title}”?`))return;try{await db.collection(pane.dataset.coll).doc(r.id).delete()}catch(err){alert('Not deleted: '+(err.message||'no write access'))}};
+a.append(e,x);el.append(a);list.append(el)}};
+if(!db){form.hidden=true;render();return}
+form.onsubmit=async ev=>{ev.preventDefault();const data=Object.fromEntries([...form.elements].filter(f=>f.name).map(f=>[f.name,f.value.trim()]));st.textContent='Saving…';
+try{const c=db.collection(pane.dataset.coll);if(editing){const old=rows.find(r=>r.id===editing);await c.doc(editing).set({...data,added:old?.added??Date.now()})}else await c.add({...data,added:Date.now()});st.textContent='Saved';reset()}catch(err){st.textContent='Not saved: '+(err.message||'no write access')}};
+db.collection(pane.dataset.coll).onSnapshot(s=>{rows=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.added??0)-(b.added??0));render()},()=>{list.innerHTML='<p class="hint">Couldn\'t load entries.</p>'});
+});});
+</script>
