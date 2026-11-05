@@ -50,7 +50,7 @@ The First Playable card must describe the **smallest** game someone can start, p
 - Interview answers start ticked: the Game Overview boxes (Genre, Theme, Core loop) ship with `checked` in the template, since the user already answered them. Remove `checked` from any box whose question the user didn't answer (e.g. you picked the theme for them). Ticked boxes stay editable: the user can untick them, and saved checks override the defaults.
 - A card whose boxes are all ticked turns gray but stays readable and clickable (`details.done`).
 - Card order: 1 Game Overview, 2 Key Features, 3 First Playable. New cards are added later, numbered 4, 5…, by request, from notes, or automatically (Expanding the Game, see section 4).
-- Exactly two other tabs, **Tab 1** and **Tab 2**, start empty with the shared placeholder text and the add/edit form.
+- Exactly three other tabs, **Tab 1**, **Tab 2** and **Tab 3**, start empty as placeholders: search, group headers, filters, sort, counts and an add/edit form, all driven by the `SCHEMA` object in the script (`tab1`–`tab3` use the generic `PLACEHOLDER` schema).
 - No ideas/parking card and no playable demo widget.
 
 ## 3. Publish
@@ -62,8 +62,8 @@ Publish with the Artifact tool: the filled file, `icon: "game"`, `capabilities: 
 - Before coding any piece of the game, read the blueprint's saved data with `ArtifactData` (`sections`, `tab1`, `tab2`, and any added collections) and follow the notes.
 - **Expanding the Game card:** whenever you read the saved data and every box in cards 1–3 is ticked (`sections/overview`, `sections/features`, `sections/playable`), and no such card exists yet, add card 4 **Expanding the Game** (`data-id="expand"`, why: "growing what we have"). Give it exactly 5 checklist items that tack onto what has actually been built: read the game's code and the blueprint's notes and entries first, so each item extends an existing system (a new tier, more content, a reward loop, an upgrade) rather than starting a new one. One line each, concrete and buildable. Tell the user the card was added.
 - **New card:** append a numbered `<details data-id="...">` in the marked spot, same structure, collapsed.
-- **Rename or repurpose a tab:** change the tab button text and its form fields; keep its `data-coll`, or move its entries to the new collection with `ArtifactData`.
-- **New tab:** add a tab button and a `<section class="pane" ... data-coll="<name>">`; the script builds its list and form.
+- **Rename or repurpose a tab:** change the tab button text and its `SCHEMA` entry (description, group field, filters, sorts, form fields); keep its `data-coll`, or move its entries to the new collection with `ArtifactData`.
+- **New tab:** add a tab button and a `<section class="pane" ... data-coll="<name>">`; add a matching `SCHEMA` entry; the script builds its toolbar, grouped list and form.
 - Republish to the same artifact URL, never a new one.
 
 ## 5. Learning (keep LESSONS.md small)

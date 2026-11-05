@@ -61,6 +61,17 @@ textarea{min-height:80px;resize:vertical;margin-top:4px}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .form label{display:grid;gap:2px;font:700 .8rem var(--body);color:var(--mute);cursor:default}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.row label{flex:1;min-width:140px}
+.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.tools input,.tools select{width:100%;box-sizing:border-box;font:15px var(--body);color:var(--fg);background:var(--bg);border:2px solid var(--line);border-radius:6px;padding:7px 8px;min-height:40px}
+.tools .q{grid-column:1/-1}
+.shown{font-size:.85rem;color:var(--mute);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.shown button{font:700 .85rem var(--body);background:none;border:0;color:var(--accent);cursor:pointer;padding:0}
+.grp{font:700 .8rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--accent2);margin:6px 0 0;padding-bottom:4px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}
+.stats{display:flex;flex-wrap:wrap;gap:6px}
+.stats span{font:700 .78rem var(--body);border:1px solid var(--line);border-radius:4px;padding:1px 6px;background:var(--card)}
+.stats b{color:var(--mute);font-weight:400}
+.tag.s-built{background:var(--ok);border-color:var(--ok);color:#fff}.tag.s-in-progress{border-color:var(--accent2);color:var(--fg)}
+.form .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
 @media (max-width:480px){.why{display:none}.cnt{margin-left:auto}}
 @media (prefers-reduced-motion:reduce){.bar i{transition:none}}
 </style>
@@ -72,6 +83,7 @@ textarea{min-height:80px;resize:vertical;margin-top:4px}
 <button role="tab" id="t-build" aria-controls="p-build" aria-selected="true">Build Log</button>
 <button role="tab" id="t-tab1" aria-controls="p-tab1" aria-selected="false">Tab 1</button>
 <button role="tab" id="t-tab2" aria-controls="p-tab2" aria-selected="false">Tab 2</button>
+<button role="tab" id="t-tab3" aria-controls="p-tab3" aria-selected="false">Tab 3</button>
 </nav>
 
 <section class="pane" id="p-build" role="tabpanel" aria-labelledby="t-build">
@@ -112,16 +124,15 @@ textarea{min-height:80px;resize:vertical;margin-top:4px}
 
 <section class="pane" id="p-tab1" role="tabpanel" aria-labelledby="t-tab1" hidden data-coll="tab1"></section>
 <section class="pane" id="p-tab2" role="tabpanel" aria-labelledby="t-tab2" hidden data-coll="tab2"></section>
+<section class="pane" id="p-tab3" role="tabpanel" aria-labelledby="t-tab3" hidden data-coll="tab3"></section>
 </main>
 
 <template id="tab-tpl">
-<div class="card"><h2 class="tab-h"></h2>
-<p class="hint">This is a placeholder tab. Ask Claude to rename it, change what it tracks (characters, enemies, levels, items…) or change its form fields. More tabs can be added the same way. Entries you add here are saved, and Claude reads them before coding.</p>
+<div class="card"><h2 class="tab-h"></h2><p class="hint tab-d"></p>
+<p class="hint">This is a placeholder tab. Ask Claude to rename it, change what it tracks (characters, enemies, levels, items…), its groups, filters, sort options or form fields. More tabs can be added the same way. Entries you add here are saved, and Claude reads them before coding.</p>
+<div class="tools"></div><div class="shown"><span class="cnt2"></span><button type="button" class="clr" hidden>Clear filters</button></div>
 <div class="items"><p class="hint">Loading…</p></div></div>
-<form class="card form"><h2 class="form-h">Add an entry</h2>
-<label>Name <input name="title" required maxlength="80"></label>
-<div class="row"><label>Status <select name="status"><option value="idea">Idea</option><option value="building">In progress</option><option value="built">Built</option></select></label></div>
-<label>Details <textarea name="details" rows="3" maxlength="2000"></textarea></label>
+<form class="card form"><h2 class="form-h">Add an entry</h2><div class="grid"></div>
 <div class="row"><button type="submit" class="btn primary save">Add entry</button><button type="button" class="btn cancel" hidden>Cancel</button><span class="st fst"></span></div></form>
 </template>
 
@@ -151,28 +162,60 @@ bs.forEach(b=>b.addEventListener('change',save));
 ref.onSnapshot(s=>{const v=s.data();if(!v)return;if(document.activeElement!==ta&&typeof v.notes==='string')ta.value=v.notes;(v.checks||[]).forEach((c,i)=>bs[i]&&(bs[i].checked=!!c));bar(d)});
 }));
 
-// Placeholder tabs: each pane is a list + add/edit form backed by its own db collection
-const LBL={idea:'Idea',building:'In progress',built:'Built'};
+// Data tabs: each pane is a filterable, grouped list + add/edit form, driven by SCHEMA and backed by its own db collection
+const STATUS=['Idea','In progress','Built'];
+const PLACEHOLDER={desc:'Entries grouped by Group, with search, filters and sort.',group:'group',sorts:{title:'Name',added:'Date added'},fields:[
+{k:'title',l:'Name',req:1},{k:'group',l:'Group',opts:['Group A','Group B','Group C'],filter:1},
+{k:'value',l:'Value',num:1},{k:'status',l:'Status',opts:STATUS,filter:1,pl:'statuses'},{k:'details',l:'Details',area:1}]};
+// Per-tab schema, keyed by data-coll. Rename tabs, groups, filters, sorts and fields here per game.
+const SCHEMA={tab1:PLACEHOLDER,tab2:PLACEHOLDER,tab3:PLACEHOLDER};
+const slug=s=>String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-');
+const mk=(tag,props={},kids=[])=>{const e=Object.assign(document.createElement(tag),props);e.append(...kids);return e};
 document.querySelectorAll('[data-coll]').forEach(pane=>{
-pane.append($('#tab-tpl').content.cloneNode(true));
-const name=document.querySelector(`[aria-controls="${pane.id}"]`).textContent;
-pane.querySelector('.tab-h').textContent=name;
-const list=pane.querySelector('.items'),form=pane.querySelector('form'),st=pane.querySelector('.fst'),save=pane.querySelector('.save'),cancel=pane.querySelector('.cancel');
-let rows=[],editing=null;
+const sc=SCHEMA[pane.dataset.coll];pane.append($('#tab-tpl').content.cloneNode(true));
+pane.querySelector('.tab-h').textContent=document.querySelector(`[aria-controls="${pane.id}"]`).textContent;
+pane.querySelector('.tab-d').textContent=sc.desc;
+const list=pane.querySelector('.items'),form=pane.querySelector('form'),st=pane.querySelector('.fst'),save=pane.querySelector('.save'),cancel=pane.querySelector('.cancel'),tools=pane.querySelector('.tools'),cnt=pane.querySelector('.cnt2'),clr=pane.querySelector('.clr');
+// form fields
+const grid=form.querySelector('.grid');
+for(const f of sc.fields){let inp;
+if(f.opts){inp=mk('select',{name:f.k});inp.append(...f.opts.map(o=>mk('option',{value:o,textContent:o})))}
+else if(f.area)inp=mk('textarea',{name:f.k,rows:3,maxLength:2000});
+else inp=mk('input',{name:f.k,maxLength:80,...(f.num?{type:'number',inputMode:'numeric'}:{}),required:!!f.req});
+const lab=mk('label',{},[f.l+' ',inp]);if(f.area||f.k==='title')lab.style.gridColumn='1/-1';grid.append(lab)}
+// toolbar
+const key='bp-f-'+pane.dataset.coll;let F={};try{F=JSON.parse(localStorage.getItem(key))||{}}catch(e){}
+const q=mk('input',{type:'search',className:'q',placeholder:'Search names and notes…',value:F.q||''});q.setAttribute('aria-label','Search');tools.append(q);
+const sels={};for(const f of sc.fields.filter(f=>f.filter)){const s=mk('select');s.setAttribute('aria-label','Filter by '+f.l);s.append(mk('option',{value:'',textContent:'All '+(f.pl||f.l.toLowerCase()+'s')}),...f.opts.map(o=>mk('option',{value:o,textContent:o})));s.value=F[f.k]||'';sels[f.k]=s;tools.append(s)}
+const so=mk('select');so.setAttribute('aria-label','Sort');so.append(...Object.entries(sc.sorts).map(([k,l])=>mk('option',{value:k,textContent:'Sort: '+l})));so.value=F.sort||'title';tools.append(so);
+let rows=[],editing=null,db=null;
+const persist=()=>{F={q:q.value,sort:so.value};for(const k in sels)F[k]=sels[k].value;try{localStorage.setItem(key,JSON.stringify(F))}catch(e){}};
+[q,so,...Object.values(sels)].forEach(e=>e.addEventListener('input',()=>{persist();render()}));
+clr.onclick=()=>{q.value='';for(const k in sels)sels[k].value='';persist();render()};
 const reset=()=>{editing=null;form.reset();pane.querySelector('.form-h').textContent='Add an entry';save.textContent='Add entry';cancel.hidden=true};
 cancel.onclick=reset;
-dbP.then(db=>{
-const render=()=>{list.innerHTML='';if(!rows.length){const p=document.createElement('p');p.className='hint';p.textContent=db?'Nothing here yet. Add the first entry below.':'Entries need saving, which isn\'t available in this view.';list.append(p);return}
-for(const r of rows){const el=document.createElement('div');el.className='item';const h=document.createElement('h3');h.append(r.title||'Untitled');
-if(r.status){const s=document.createElement('span');s.className='tag '+r.status;s.textContent=LBL[r.status]??r.status;h.append(s)}el.append(h);
-if(r.details){const p=document.createElement('p');p.textContent=r.details;el.append(p)}
-const a=document.createElement('div');a.className='acts';
-const e=document.createElement('button');e.type='button';e.className='btn';e.textContent='Edit';e.onclick=()=>{editing=r.id;for(const f of form.elements)if(f.name)f.value=r[f.name]??(f.tagName==='SELECT'?f.options[0].value:'');pane.querySelector('.form-h').textContent='Edit entry';save.textContent='Save changes';cancel.hidden=false;form.scrollIntoView({behavior:'smooth'})};
-const x=document.createElement('button');x.type='button';x.className='btn';x.textContent='Delete';x.onclick=async()=>{if(!confirm(`Delete “${r.title}”?`))return;try{await db.collection(pane.dataset.coll).doc(r.id).delete()}catch(err){alert('Not deleted: '+(err.message||'no write access'))}};
-a.append(e,x);el.append(a);list.append(el)}};
+const card=r=>{const el=mk('div',{className:'item'});const h=mk('h3',{},[r.title||'Untitled']);
+for(const f of sc.fields)if(f.filter&&f.k!==sc.group&&r[f.k])h.append(mk('span',{className:'tag s-'+slug(r[f.k]),textContent:r[f.k]}));el.append(h);
+const stats=sc.fields.filter(f=>(f.num||f.short)&&r[f.k]!==undefined&&r[f.k]!=='');
+if(stats.length)el.append(mk('div',{className:'stats'},stats.map(f=>mk('span',{},[mk('b',{textContent:(f.short||f.l)+' '}),String(r[f.k])]))));
+if(r.details)el.append(mk('p',{textContent:r.details}));
+if(db){const e=mk('button',{type:'button',className:'btn',textContent:'Edit'});e.onclick=()=>{editing=r.id;for(const f of form.elements)if(f.name)f.value=r[f.name]??(f.tagName==='SELECT'?f.options[0].value:'');pane.querySelector('.form-h').textContent='Edit: '+r.title;save.textContent='Save changes';cancel.hidden=false;form.scrollIntoView({behavior:'smooth'})};
+const x=mk('button',{type:'button',className:'btn',textContent:'Delete'});x.onclick=async()=>{if(!confirm(`Delete “${r.title}”?`))return;try{await db.collection(pane.dataset.coll).doc(r.id).delete()}catch(err){alert('Not deleted: '+(err.message||'no write access'))}};
+el.append(mk('div',{className:'acts'},[e,x]))}return el};
+const render=()=>{list.innerHTML='';const active=q.value||Object.values(sels).some(s=>s.value);clr.hidden=!active;
+if(!rows.length){cnt.textContent='';list.append(mk('p',{className:'hint',textContent:db?'Nothing here yet. Add the first entry below.':'Entries need saving, which isn\'t available in this view.'}));return}
+const s=q.value.trim().toLowerCase(),sk=so.value,isNum=sk==='added'||sc.fields.find(f=>f.k===sk)?.num;
+const shown=rows.filter(r=>(!s||[r.title,r.details,r.bonus,r.check].join(' ').toLowerCase().includes(s))&&Object.entries(sels).every(([k,e])=>!e.value||r[k]===e.value))
+.sort((a,b)=>isNum?(+a[sk]||0)-(+b[sk]||0):String(a[sk]??'').localeCompare(String(b[sk]??'')));
+cnt.textContent=`Showing ${shown.length} of ${rows.length}`;
+if(!shown.length){list.append(mk('p',{className:'hint',textContent:'No entries match these filters.'}));return}
+const gf=sc.fields.find(f=>f.k===sc.group),order=[...gf.opts,''];
+for(const g of order){const items=shown.filter(r=>g?r[sc.group]===g:!gf.opts.includes(r[sc.group]));if(!items.length)continue;
+list.append(mk('h3',{className:'grp'},[mk('span',{textContent:g||'Other'}),mk('span',{textContent:items.length})]),...items.map(card))}};
+dbP.then(d=>{db=d;
 if(!db){form.hidden=true;render();return}
-form.onsubmit=async ev=>{ev.preventDefault();const data=Object.fromEntries([...form.elements].filter(f=>f.name).map(f=>[f.name,f.value.trim()]));st.textContent='Saving…';
+form.onsubmit=async ev=>{ev.preventDefault();const data=Object.fromEntries([...form.elements].filter(f=>f.name).map(f=>[f.name,f.type==='number'&&f.value!==''?+f.value:f.value.trim()]));st.textContent='Saving…';
 try{const c=db.collection(pane.dataset.coll);if(editing){const old=rows.find(r=>r.id===editing);await c.doc(editing).set({...data,added:old?.added??Date.now()})}else await c.add({...data,added:Date.now()});st.textContent='Saved';reset()}catch(err){st.textContent='Not saved: '+(err.message||'no write access')}};
-db.collection(pane.dataset.coll).onSnapshot(s=>{rows=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.added??0)-(b.added??0));render()},()=>{list.innerHTML='<p class="hint">Couldn\'t load entries.</p>'});
+db.collection(pane.dataset.coll).onSnapshot(s=>{rows=s.docs.map(d=>({id:d.id,...d.data()}));render()},()=>{list.innerHTML='<p class="hint">Couldn\'t load entries.</p>'});
 });});
 </script>

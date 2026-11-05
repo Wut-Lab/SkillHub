@@ -5,7 +5,7 @@ Skills for AI.
 
 | Skill | What it does | Use it |
 |---|---|---|
-| [game-blueprint](.claude/skills/game-blueprint/SKILL.md) | Interviews you about a game, then publishes a themed Blueprint artifact: a Build Log (Game Overview, Key Features, First Playable), saved notes for Claude, and two placeholder tabs with add/edit forms. Learns your preferences in `LESSONS.md`. | `/game-blueprint` or "make a blueprint for my new game" |
+| [game-blueprint](.claude/skills/game-blueprint/SKILL.md) | Interviews you about a game, then publishes a themed Blueprint artifact: a Build Log (Game Overview, Key Features, First Playable), saved notes for Claude, and three filterable placeholder tabs with add/edit forms. Learns your preferences in `LESSONS.md`. | `/game-blueprint` or "make a blueprint for my new game" |
 
 ## Using these skills
 
