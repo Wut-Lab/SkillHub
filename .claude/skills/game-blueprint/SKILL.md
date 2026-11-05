@@ -47,6 +47,7 @@ The First Playable card must describe the **smallest** game someone can start, p
 
 **Fixed rules (don't change unless a lesson says so):**
 - Build Log cards start collapsed (no `open` attribute).
+- Interview answers start ticked: the Game Overview boxes (Genre, Theme, Core loop) ship with `checked` in the template, since the user already answered them. Remove `checked` from any box whose question the user didn't answer (e.g. you picked the theme for them). Ticked boxes stay editable: the user can untick them, and saved checks override the defaults.
 - A card whose boxes are all ticked turns gray but stays readable and clickable (`details.done`).
 - Card order: 1 Game Overview, 2 Key Features, 3 First Playable. New cards are added later, numbered 4, 5…, by request, from notes, or automatically (Expanding the Game, see section 4).
 - Exactly two other tabs, **Tab 1** and **Tab 2**, start empty with the shared placeholder text and the add/edit form.
