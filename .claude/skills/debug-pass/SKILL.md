@@ -61,4 +61,15 @@ A few short lines: what was covered (and what wasn't), bugs fixed, anything susp
 
 ## 6. Learning (keep LESSONS.md small)
 
-When the user corrects this skill or states a lasting preference, save it to `LESSONS.md` without asking: merge with an existing lesson on the same point, one dated line under the right heading, under 40 lessons. Promote lessons that have held for 3+ passes into this file. Commit and push to SkillHub `main` as `lesson: <what changed>`, and tell the user in one line ("Saved lesson: … (say *undo lesson* to revert)"). On **undo lesson**, `git revert` the latest `lesson:` commit and push.
+When the user corrects this skill or states a lasting preference ("always…", "never…", "next time…"), save it to `LESSONS.md` **without asking for approval**:
+
+1. Find an existing lesson on the same point. Replace or merge it instead of adding a duplicate; a newer preference overrides an older one.
+2. File it under the right heading (Mapping, Static checks, Run-through, Fixing, Reporting, Other), one short line, dated `YYYY-MM-DD`.
+3. Keep the file under 40 lessons. When it reaches that, tidy it: remove stale lessons, combine similar ones.
+4. **Promote**: when a lesson has held for 3+ passes, or the user says to make it permanent, fold it into this SKILL.md (or a recipe) and delete it from LESSONS.md.
+5. Commit and push to `main` of the SkillHub repo right away, message `lesson: <what changed>`. Tell the user in one line: "Saved lesson: … (say *undo lesson* to revert)".
+6. If the user says **undo lesson**, `git revert` the most recent `lesson:` commit and push.
+
+Also save a lesson, without being asked, when a pass teaches something general the hard way (a harness trick, a false-clean result, a check that caught a real bug), so the next pass on any project starts smarter.
+
+One-off requests for a single project ("skip the zone tests here") are not lessons. When unsure, apply the change and ask in one line whether to keep it for every pass.

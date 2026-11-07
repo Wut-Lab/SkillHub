@@ -7,7 +7,10 @@ Short, dated preferences learned from use. Read before every pass. Keep under 40
 ## Static checks
 
 ## Run-through
+- Open lazy dev menus before counting their options; a fresh-save list can hold one entry and make a pass look clean. (2026-11-07)
 
 ## Fixing
 
 ## Reporting
+
+## Other
